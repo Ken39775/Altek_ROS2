@@ -1,38 +1,16 @@
-# ROS2 Wrapper for Intel&reg; RealSense&trade; Devices
-These are packages for using Intel RealSense cameras (D400 and L500 series, SR300 camera and T265 Tracking Module) with ROS2.
+# ROS2 Wrapper for  Altek AL6100 depth camera Devices
+These are packages for using Altek AL6100 depth cameras with ROS2.
 
-This version supports ROS2 Dashing, Eloquent, Foxy, Galactic and Rolling.
+This version supports ROS2 Dashing, Eloquent, Foxy, and Galactic.
 
-LibRealSense supported version: v2.51.1 (see [realsense2_camera release notes](https://github.com/IntelRealSense/realsense-ros/releases))
+Altek 3D Camera SDK supported version : v1.0 
 
-
-## For LibRS ROS1 Wrapper please refer to [ROS1-legacy branch](https://github.com/IntelRealSense/realsense-ros/tree/ros1-legacy)
-
-## Please notice: if you are moving from RealSense [ROS2-legacy branch](https://github.com/IntelRealSense/realsense-ros/tree/ros2-legacy) to ROS2-development:
-- **Changed Parameters**:
-    - **"stereo_module"**, **"l500_depth_sensor"** are replaced by **"depth_module"**
-    - For video streams: **\<module>.profile** replaces **\<stream>_width**, **\<stream>_height**, **\<stream>_fps**
-        - **ROS2-legacy (Old)**:
-          - ros2 launch realsense2_camera rs_launch.py depth_width:=640 depth_height:=480 depth_fps:=30.0 infra1_width:=640 infra1_height:=480 infra1_fps:=30.0
-        - **ROS2-development (New)**:
-          - ros2 launch realsense2_camera rs_launch.py depth_module.profile:=640x480x30
-    - Removed paramets **\<stream>_frame_id**, **\<stream>_optical_frame_id**. frame_ids are now defined by camera_name
-    - **"filters"** is removed. All filters (or post-processing blocks) are enabled/disabled using **"\<filter>.enable"**
-    - **"align_depth"** is now a regular processing block and as such the parameter for enabling it is replaced with **"align_depth.enable"**
-    - **"allow_no_texture_points"**, **"ordered_pc"** are now belong to the pointcloud filter and as such are replaced by **"pointcloud.allow_no_texture_points"**, **"pointcloud.ordered_pc"**
-    - **"pointcloud_texture_stream"**, **"pointcloud_texture_index"** belong now to the pointcloud filter and were renamed to match their librealsense' names: **"pointcloud.stream_filter"**, **"pointcloud.stream_index_filter"**
-- Allow enable/disable of sensors in runtime (parameters **\<stream>.enable**)
-- Allow enable/disable of filters in runtime (parameters **\<filter_name>.enable**)
-- **unite_imu_method** parameter is now changeable in runtime.
-- **enable_sync** parameter is now changeable in runtime.
-
-
+## For LibRS ROS1 Wrapper please refer to [ROS1-legacy branch](https://github.com/owin1022/Altek_ROS)
 
 ## Installation Instructions
 
    ### Step 1: Install the ROS2 distribution
- - #### Ubuntu 22.04:
-   - [ROS2 Humble](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
+
  - #### Ubuntu 20.04: 
    - [ROS2 Foxy](https://docs.ros.org/en/foxy/Installation/Ubuntu-Install-Debians.html)
    - [ROS2 Galactic](https://docs.ros.org/en/galactic/Installation/Ubuntu-Install-Debians.html)
@@ -41,33 +19,28 @@ LibRealSense supported version: v2.51.1 (see [realsense2_camera release notes](h
    - [ROS2 Eloquent](https://docs.ros.org/en/eloquent/Installation/Linux-Install-Debians.html)
 
 
-### Step 2: Install the latest Intel&reg; RealSense&trade; SDK 2.0
+### Step 2: Install the latest Altek 3D Camera SDK 1.0
 
-- #### Option 1: Install librealsense2 debian package (Not supported in Ubuntu 22.04 yet)
-   - Jetson users - use the [Jetson Installation Guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation_jetson.md)
-   - Otherwise, install from [Linux Debian Installation Guide](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md#installing-the-packages)
-      - In this case treat yourself as a developer: make sure to follow the instructions to also install librealsense2-dev and librealsense2-dkms packages
-
-- #### Option 2: Build from source
-  - Download the latest [Intel&reg; RealSense&trade; SDK 2.0](https://github.com/IntelRealSense/librealsense/releases/tag/v2.51.1)
-  - Follow the instructions under [Linux Installation](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md)
+- #### Build from source
+  - Download the latest [Intel&reg; Altek 3D Camera SDK 1.0](https://github.com/owin1022/Altek_3D_Camera)
+  - Follow the instructions under [Linux Installation](https://github.com/owin1022/Altek_3D_Camera/blob/main/build_realsense_viewer_ubuntu1804.txt)
 
 
-### Step 3: Install Intel&reg; RealSense&trade; ROS2 wrapper from sources
+### Step 3: Install Altek 3D Camera ROS2 wrapper from sources
    - Create a ROS2 workspace
       ```bash
       mkdir -p ~/ros2_ws/src
       cd ~/ros2_ws/src/
       ```
-   - Clone the latest ROS2 Intel&reg; RealSense&trade;  wrapper from [here](https://github.com/IntelRealSense/realsense-ros.git) into '~/ros2_ws/src/'
+   - Clone the latest ROS2 Altek 3D Camera SDK wrapper from [here](https://github.com/owin1022/Altek_ROS2) into '~/ros2_ws/src/'
       ```bashrc
-      git clone https://github.com/IntelRealSense/realsense-ros.git -b ros2-development
+      git clone https://github.com/owin1022/Altek_ROS2.git
       cd ~/ros2_ws
       ```
 ### Step 4: Install dependencies
    ```bash
    sudo apt-get install python3-rosdep -y
-   sudo rosdep init # "sudo rosdep init --include-eol-distros" for Eloquent and earlier
+   sudo rosdep init --include-eol-distros
    rosdep update # "sudo rosdep update --include-eol-distros" for Eloquent and earlier
    rosdep install -i --from-path src --rosdistro $ROS_DISTRO --skip-keys=librealsense2 -y
    ```
@@ -110,7 +83,7 @@ This will stream all camera sensors and publish on the appropriate ROS topics.
 
 ### Published Topics
 The published topics differ according to the device and parameters.
-After running the above command with D435i attached, the following list of topics will be available (This is a partial list. For full one type `ros2 topic list`):
+After running the above command with Altek 3D Camera attached, the following list of topics will be available (This is a partial list. For full one type `ros2 topic list`):
 - /camera/aligned_depth_to_color/camera_info
 - /camera/aligned_depth_to_color/image_raw
 - /camera/color/camera_info
@@ -146,18 +119,9 @@ Enabling stream adds matching topics. For instance, enabling the gyro and accel 
 - /camera/gyro/metadata
 - /camera/gyro/sample
 
-
->Using an L515 device the list differs a little by adding a 4-bit confidence grade (published as a mono8 image):
->- /camera/confidence/camera_info
->- /camera/confidence/image_rect_raw
->
->It also replaces the 2 infrared topic sets with the single available one:
->- /camera/infra/camera_info
->- /camera/infra/image_raw
-
 To turn them off: `ros2 param set /camera/camera enable_infra false`
 The "/camera" prefix is the namesapce specified in the given launch file.
-When using D435 or D415, the gyro and accel topics wont be available. Likewise, other topics will be available when using T265 (see below).
+When using Altek 3Di Camera, the gyro and accel topics will be available.
 
 ### The metadata topic:
 The metadata messages store the camera's available metadata in a *json* format. To learn more, a dedicated script for echoing a metadata topic in runtime is attached. For instance, use the following command to echo the camera/depth/metadata topic:
@@ -186,7 +150,7 @@ The following processing blocks are available:
    - ```hole_filling_filter``` - apply hole-filling filter.
    - ```decimation_filter``` - reduces depth scene complexity.
 
-Each of the above filters have it's own parameters, following the naming convention of `<filter_name>.<parameter_name>` including a `<filter_name>.enable` parameter to enable/disable it. 
+Each of the above filters have it's own parameters, following the naming convention of `<filter_name>.<parameter_name>` including a `<filter_name>.enable` parameter to enable/disable it.
 
 ### Sensor Parameters:
 Each sensor has a unique set of parameters.
@@ -208,7 +172,7 @@ For setting a new value for a parameter use `ros2 param set <node> <parameter_na
 - **enable_sync**: gathers closest frames of different sensors, infra red, color and depth, to be sent with the same timetag. This happens automatically when such filters as pointcloud are enabled.
 - ***<stream_type>*_qos**: <stream_type> can be any of *infra, color, fisheye, depth, gyro, accel, pose*. Sets the QoS by which the topic is published. Available values are the following strings: SYSTEM_DEFAULT, DEFAULT, PARAMETER_EVENTS, SERVICES_DEFAULT, PARAMETERS, SENSOR_DATA.
 - **Notice:** ***<stream_type>*_info_qos** refers to both camera_info topics and metadata topics.
-- **tf_publish_rate**: double, positive values mean dynamic transform publication with specified rate, all other values mean static transform publication. Defaults to 0 
+- **tf_publish_rate**: double, positive values mean dynamic transform publication with specified rate, all other values mean static transform publication. Defaults to 0
 
 
 
@@ -216,7 +180,7 @@ For setting a new value for a parameter use `ros2 param set <node> <parameter_na
 - **serial_no**: will attach to the device with the given serial number (*serial_no*) number. Default, attach to the first (in an inner list) RealSense device.
   - Note: serial number can also be defined with "_" prefix. For instance, serial number 831612073525 can be set in command line as `serial_no:=_831612073525`. That is a workaround until a better method will be found to ROS2's auto conversion of strings containing only digits into integers.
 - **usb_port_id**: will attach to the device with the given USB port (*usb_port_id*). i.e 4-1, 4-2 etc. Default, ignore USB port when choosing a device.
-- **device_type**: will attach to a device whose name includes the given *device_type* regular expression pattern. Default, ignore device type. For example, device_type:=d435 will match d435 and d435i. device_type=d435(?!i) will match d435 but not d435i.
+- **device_type**: will attach to a device whose name includes the given *device_type* regular expression pattern. Default, ignore device type. 
 - **reconnect_timeout**: When the driver cannot connect to the device try to reconnect after this timeout (in seconds).
 - **wait_for_device_timeout**: If the specified device is not found, will wait *wait_for_device_timeout* seconds before exits. Defualt, *wait_for_device_timeout < 0*, will wait indefinitely.
 - **rosbag_filename**: Publish topics from rosbag file. There are two ways for loading rosbag file:
@@ -230,15 +194,13 @@ For setting a new value for a parameter use `ros2 param set <node> <parameter_na
 - **base_frame_id**: defines the frame_id all static transformations refers to.
 - **odom_frame_id**: defines the origin coordinate system in ROS convention (X-Forward, Y-Left, Z-Up). pose topic defines the pose relative to that system.
 
-- **unite_imu_method**: The D435i and T265 cameras have built in IMU components which produce 2 unrelated streams: *gyro* - which shows angular velocity and *accel* which shows linear acceleration. Each with it's own frequency. By default, 2 corresponding topics are available, each with only the relevant fields of the message sensor_msgs::Imu are filled out.
+- **unite_imu_method**: The Altek 3Di camera have built in IMU components which produce 2 unrelated streams: *gyro* - which shows angular velocity and *accel* which shows linear acceleration. Each with it's own frequency. By default, 2 corresponding topics are available, each with only the relevant fields of the message sensor_msgs::Imu are filled out.
 Setting *unite_imu_method* creates a new topic, *imu*, that replaces the default *gyro* and *accel* topics. The *imu* topic is published at the rate of the gyro. All the fields of the Imu message under the *imu* topic are filled out. `unite_imu_method` parameter supported values are [0-2] meaning:  [0 -> None, 1 -> Copy, 2 -> Linear_ interpolation] when:
    - **linear_interpolation**: Every gyro message is attached by the an accel message interpolated to the gyro's timestamp.
    - **copy**: Every gyro message is attached by the last accel message.
 - **clip_distance**: remove from the depth image all values above a given value (meters). Disable by giving negative value (default)
-- **linear_accel_cov**, **angular_velocity_cov**: sets the variance given to the Imu readings. For the T265, these values are being modified by the inner confidence value.
+- **linear_accel_cov**, **angular_velocity_cov**: sets the variance given to the Imu readings.
 - **hold_back_imu_for_frames**: Images processing takes time. Therefor there is a time gap between the moment the image arrives at the wrapper and the moment the image is published to the ROS environment. During this time, Imu messages keep on arriving and a situation is created where an image with earlier timestamp is published after Imu message with later timestamp. If that is a problem, setting *hold_back_imu_for_frames* to *true* will hold the Imu messages back while processing the images and then publish them all in a burst, thus keeping the order of publication as the order of arrival. Note that in either case, the timestamp in each message's header reflects the time of it's origin.
-- **topic_odom_in**: For T265, add wheel odometry information through this topic. The code refers only to the *twist.linear* field in the message.
-- **calib_odom_file**: For the T265 to include odometry input, it must be given a [configuration file](https://github.com/IntelRealSense/librealsense/blob/master/unit-tests/resources/calibration_odometry.json). Explanations can be found [here](https://github.com/IntelRealSense/librealsense/pull/3462). The calibration is done in ROS coordinates system.
 - **publish_tf**: boolean, publish or not TF at all. Defaults to True.
 - **diagnostics_period**: double, positive values set the period between diagnostics updates on the `/diagnostics` topic. 0 or negative values mean no diagnostics topic is published. Defaults to 0.</br>
 The `/diagnostics` topic includes information regarding the device temperatures and actual frequency of the enabled streams.
@@ -248,21 +210,6 @@ The `/diagnostics` topic includes information regarding the device temperatures 
 ### Available services:
 - device_info : retrieve information about the device - serial_number, firmware_version etc. Type `ros2 interface show realsense2_camera_msgs/srv/DeviceInfo` for the full list. Call example: `ros2 service call /camera/device_info realsense2_camera_msgs/srv/DeviceInfo`
   - Note that for **ROS2 Dashing** the command is `ros2 srv show realsense2_camera_msgs/srv/DeviceInfo`
-## Using T265 ##
-
-### Start the camera node
-To start the camera node:
-
-```bash
-ros2 run realsense2_camera realsense2_camera_node --ros-args -p enable_pose:=true -p device_type:=t265
-```
-or, if you also have a d4xx connected, you can try out the launch file:
-```bash
-ros2 launch realsense2_camera rs_d400_and_t265_launch.py enable_fisheye12:=true enable_fisheye22:=true
-```
-- note: the parameters are called `enable_fisheye12` and `enable_fisheye22`. The node knows them as `enable_fisheye1` and `enable_fisheye2` but launch file runs 2 nodes and these parameters refer to the second one.
-
-
 
 ## Efficient intra-process communication:
 
