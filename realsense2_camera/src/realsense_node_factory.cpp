@@ -251,7 +251,21 @@ void RealSenseNodeFactory::init()
             ROS_WARN("***************************************************");
         }
 
-        auto severity = rs2_log_severity::RS2_LOG_SEVERITY_WARN;
+		rs2_log_severity severity = rs2_log_severity::RS2_LOG_SEVERITY_WARN;
+
+        try
+        {
+		    auto rs_severity = declare_parameter("rs_log_level", rclcpp::ParameterValue("")).get<rclcpp::PARAMETER_INTEGER>();
+            severity = static_cast<rs2_log_severity>(rs_severity);
+        } 
+        catch(const std::exception& e)
+        {
+
+        }
+
+        ROS_INFO("Checking rs_log_leve: %d",severity);
+        
+
         tryGetLogSeverity(severity);
         if (rs2_log_severity::RS2_LOG_SEVERITY_DEBUG == severity)
             console_bridge::setLogLevel(console_bridge::CONSOLE_BRIDGE_LOG_DEBUG);
