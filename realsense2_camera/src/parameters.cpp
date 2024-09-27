@@ -40,6 +40,10 @@ void BaseRealSenseNode::getParameters()
     _json_file_path = _parameters->setParam<std::string>(param_name, "");
     _parameters_names.push_back(param_name);
 
+    param_name = std::string("publish_ai");
+    _enable_publish_al3d_ai = _parameters->setParam<bool>(param_name, true);
+    _parameters_names.push_back(param_name);
+
     param_name = std::string("clip_distance");
     _clipping_distance = _parameters->setParam<double>(param_name, -1.0);
     _parameters_names.push_back(param_name);
@@ -72,7 +76,7 @@ void BaseRealSenseNode::setDynamicParams()
     _imu_sync_method = imu_sync_method::NONE;
 
     auto imu_sync_method_string = [](imu_sync_method value) 
-    { 
+    {                                                                                                                                                          
         switch (value)
         {
         case imu_sync_method::COPY:

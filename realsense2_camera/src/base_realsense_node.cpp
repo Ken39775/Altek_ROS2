@@ -1134,6 +1134,17 @@ void BaseRealSenseNode::publishFrame(rs2::frame f, const rclcpp::Time& t,
     {
         publishMetadata(f, t, OPTICAL_FRAME_ID(stream));
     }
+
+	if (f.is<rs2::video_frame>())
+	{
+        rclcpp::Parameter p =_node.get_parameter("publish_ai");
+        _enable_publish_al3d_ai = p.as_bool();
+        
+		if(_enable_publish_al3d_ai)
+		{	
+			publishAIdata(f, t, OPTICAL_FRAME_ID(stream));
+		}
+	}
 }
 
 void BaseRealSenseNode::publishMetadata(rs2::frame f, const rclcpp::Time& header_time, const std::string& frame_id)
@@ -1176,10 +1187,58 @@ void BaseRealSenseNode::publishMetadata(rs2::frame f, const rclcpp::Time& header
     }
 }
 
+void BaseRealSenseNode::publishAIdata(rs2::frame f, const rclcpp::Time& header_time, const std::string& frame_id)
+{
+    stream_index_pair stream = {f.get_profile().stream_type(), f.get_profile().stream_index()};    
+    if (_ai_data_publishers.find(stream) != _ai_data_publishers.end())
+    {
+        auto& ai_publisher = _ai_data_publishers.at(stream);
+		
+        if (0 != ai_publisher->get_subscription_count())
+		{
+            realsense2_camera_msgs::msg::QrCodeList msg_qr_list;
+
+            if(_publish_al3d_ai)
+            {
+                AI_INFO ai_info;
+                
+                auto ai_results_ptr = f.get_al3d_ai_results();
+                memcpy(&ai_info, (char*)ai_results_ptr, sizeof(ai_info));
+
+                msg_qr_list.header.frame_id = frame_id;
+                msg_qr_list.header.stamp = header_time;
+                msg_qr_list.list.clear();            
+
+                if(ai_info.num > 0)
+                {
+                    AI_DATA ai_data;
+                    realsense2_camera_msgs::msg::QrCode msg_qr;
+                    int ai_box_info_start = 0;
+
+                    for(uint32_t i = 0; i < ai_info.num; i++)
+                    {   
+                        memcpy((char*)&ai_data, &ai_info.data[ai_box_info_start], sizeof(ai_data));
+                        msg_qr.index = i;
+                        msg_qr.x = ai_data.x;
+                        msg_qr.y = ai_data.y;
+                        msg_qr.z = ai_data.z;
+                        msg_qr.theta = ai_data.degree;
+                        msg_qr.distance = static_cast<float>(ai_data.distance)/1000;
+                        msg_qr_list.list.push_back(msg_qr);
+                        ai_box_info_start += sizeof(ai_data);
+                    }
+                }
+            }
+            
+            ai_publisher->publish(msg_qr_list);
+        }
+	}
+}
+
 void BaseRealSenseNode::startDiagnosticsUpdater()
 {
     std::string serial_no = _dev.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-    if (_diagnostics_period > 0)
+    if (_diagnostics_period  > 0)
     {
         ROS_INFO_STREAM("Publish diagnostics every " << _diagnostics_period << " seconds.");
         _diagnostics_updater = std::make_shared<diagnostic_updater::Updater>(&_node, _diagnostics_period);

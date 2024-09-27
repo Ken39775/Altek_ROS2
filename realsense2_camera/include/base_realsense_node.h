@@ -19,6 +19,8 @@
 #include "realsense2_camera_msgs/msg/imu_info.hpp"
 #include "realsense2_camera_msgs/msg/extrinsics.hpp"
 #include "realsense2_camera_msgs/msg/metadata.hpp"
+#include "realsense2_camera_msgs/msg/qr_code.hpp"
+#include "realsense2_camera_msgs/msg/qr_code_list.hpp"
 #include "realsense2_camera_msgs/srv/device_info.hpp"
 #include <librealsense2/hpp/rs_processing.hpp>
 #include <librealsense2/rs_advanced_mode.hpp>
@@ -46,6 +48,8 @@
 
 using realsense2_camera_msgs::msg::Extrinsics;
 using realsense2_camera_msgs::msg::IMUInfo;
+using realsense2_camera_msgs::msg::QrCode;
+using realsense2_camera_msgs::msg::QrCodeList;
 
 #define FRAME_ID(sip) (static_cast<std::ostringstream&&>(std::ostringstream() << _camera_name << "_" << STREAM_NAME(sip) << "_frame")).str()
 #define IMU_FRAME_ID (static_cast<std::ostringstream&&>(std::ostringstream() << _camera_name << "_imu_frame")).str()
@@ -204,6 +208,7 @@ namespace realsense2_camera
                           const std::map<stream_index_pair, std::shared_ptr<image_publisher>>& image_publishers,
                           const bool is_publishMetadata = true);
         void publishMetadata(rs2::frame f, const rclcpp::Time& header_time, const std::string& frame_id);
+        void publishAIdata(rs2::frame f, const rclcpp::Time& header_time, const std::string& frame_id);
 
         sensor_msgs::msg::Imu CreateUnitedMessage(const CimuData accel_data, const CimuData gyro_data);
 
@@ -262,6 +267,7 @@ namespace realsense2_camera
         std::map<unsigned int, int> _image_format;
         std::map<stream_index_pair, rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr> _info_publisher;
         std::map<stream_index_pair, rclcpp::Publisher<realsense2_camera_msgs::msg::Metadata>::SharedPtr> _metadata_publishers;
+		std::map<stream_index_pair, rclcpp::Publisher<realsense2_camera_msgs::msg::QrCodeList>::SharedPtr> _ai_data_publishers;
         std::map<stream_index_pair, rclcpp::Publisher<IMUInfo>::SharedPtr> _imu_info_publisher;
         std::map<stream_index_pair, rclcpp::Publisher<Extrinsics>::SharedPtr> _extrinsics_publishers;
         std::map<stream_index_pair, Extrinsics> _extrinsics_msgs;
@@ -276,6 +282,8 @@ namespace realsense2_camera
         bool _sync_frames;
         bool _pointcloud;
         bool _publish_odom_tf;
+        bool _publish_al3d_ai;
+        bool _enable_publish_al3d_ai;		
         imu_sync_method _imu_sync_method;
         stream_index_pair _pointcloud_texture;
         PipelineSyncer _syncer;
@@ -307,5 +315,24 @@ namespace realsense2_camera
 
 
     };//end class
+
+	struct AI_DATA
+    {
+        uint16_t reserved_1[5];
+        uint16_t distance;
+        float    degree;
+        float    x;
+        float    y;
+        float    z; 
+        uint16_t reserved_2[9];
+    };
+
+    struct AI_INFO
+    {
+        uint32_t reserved_1;
+        uint32_t num;
+        uint64_t reserved_2;
+        uint8_t data[1000];
+    };
 }
 

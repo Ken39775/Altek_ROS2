@@ -22,6 +22,8 @@ set(msg_files
   "msg/IMUInfo.msg"
   "msg/Extrinsics.msg"
   "msg/Metadata.msg"
+  "msg/QrCode.msg"
+  "msg/QrCodeList.msg"
 )
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}

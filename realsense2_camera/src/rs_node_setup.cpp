@@ -136,6 +136,19 @@ void BaseRealSenseNode::setAvailableSensors()
         {
             ROS_DEBUG_STREAM("Set " << module_name << " as VideoSensor.");
             rosSensor = std::make_unique<RosSensor>(sensor, _parameters, frame_callback_function, update_sensor_func, hardware_reset_func, _diagnostics_updater, _logger, _use_intra_process, _dev.is<playback>());
+
+			_publish_al3d_ai = false;
+            
+            if(sensor.is<rs2::color_sensor>())
+            {
+                if (sensor.supports(RS2_OPTION_AL3D_AI_Enable))
+                {
+                    _publish_al3d_ai = true;
+                    sensor.set_option(RS2_OPTION_AL3D_AI_Enable, 1); // enable ai
+                    ROS_INFO_STREAM("set AI enable :" << sensor.get_option(RS2_OPTION_AL3D_AI_Enable));
+                }
+            }
+			
         }
         else if (sensor.is<rs2::motion_sensor>())
         {
@@ -176,6 +189,7 @@ void BaseRealSenseNode::stopPublishers(const std::vector<stream_profile>& profil
             _info_publisher.erase(sip);
             _depth_aligned_image_publishers.erase(sip);
             _depth_aligned_info_publisher.erase(sip);
+			_ai_data_publishers.erase(sip);
         }
         else if (profile.is<rs2::motion_stream_profile>())
         {
@@ -247,6 +261,13 @@ void BaseRealSenseNode::startPublishers(const std::vector<stream_profile>& profi
                 }
                 _depth_aligned_info_publisher[sip] = _node.create_publisher<sensor_msgs::msg::CameraInfo>(aligned_camera_info.str(),
                                                       rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(info_qos), info_qos));
+            }
+			
+			if(sip == COLOR)
+            {
+			    std::string topic_al_data(stream_name + "/ai_data");
+			    _ai_data_publishers[sip] = _node.create_publisher<realsense2_camera_msgs::msg::QrCodeList>(topic_al_data, 
+				    					rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(info_qos), info_qos));
             }
         }
         else if (profile.is<rs2::motion_stream_profile>())
